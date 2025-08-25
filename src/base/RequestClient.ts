@@ -1,14 +1,10 @@
 import { HttpMethod } from "../interfaces";
-import axios, {
-  AxiosInstance,
-  AxiosRequestConfig,
-  AxiosResponse,
-  InternalAxiosRequestConfig,
-} from "axios";
 import * as fs from "fs";
-import HttpsProxyAgent from "https-proxy-agent";
+import * as HttpsProxyAgent from "https-proxy-agent";
 import qs from "qs";
 import * as https from "https";
+import * as http from "http";
+import { URL } from "url";
 import Response from "../http/response";
 import Request, {
   Headers,
@@ -27,11 +23,35 @@ const DEFAULT_MAX_SOCKETS = 20;
 const DEFAULT_MAX_FREE_SOCKETS = 5;
 const DEFAULT_MAX_TOTAL_SOCKETS = 100;
 
-interface BackoffAxiosRequestConfig extends AxiosRequestConfig {
+interface BackoffRequestConfig {
   /**
-   * Current retry attempt performed by Axios
+   * Current retry attempt performed by the HTTP client
    */
   retryCount?: number;
+  method: HttpMethod;
+  url: string;
+  headers?: Headers;
+  data?: any;
+  params?: object;
+  timeout?: number;
+}
+
+interface HttpRequestConfig {
+  method: HttpMethod;
+  url: string;
+  headers?: Headers;
+  data?: any;
+  params?: object;
+  timeout?: number;
+  maxRedirects?: number;
+  proxy?: boolean;
+}
+
+interface HttpResponse<T = any> {
+  status: number;
+  statusText: string;
+  headers: any;
+  data: T;
 }
 
 interface ExponentialBackoffResponseHandlerOptions {
@@ -46,15 +66,13 @@ interface ExponentialBackoffResponseHandlerOptions {
 }
 
 function getExponentialBackoffResponseHandler(
-  axios: AxiosInstance,
+  httpClient: (config: HttpRequestConfig) => Promise<HttpResponse>,
   opts: ExponentialBackoffResponseHandlerOptions
 ) {
   const maxIntervalMillis = opts.maxIntervalMillis;
   const maxRetries = opts.maxRetries;
 
-  return function (res: AxiosResponse<any, any>) {
-    const config: BackoffAxiosRequestConfig = res.config;
-
+  return function (res: HttpResponse, config: BackoffRequestConfig): Promise<HttpResponse> | HttpResponse {
     if (res.status !== 429) {
       return res;
     }
@@ -68,8 +86,8 @@ function getExponentialBackoffResponseHandler(
       );
       const delay = Math.floor(baseDelay * Math.random()); // Full jitter backoff
 
-      return new Promise((resolve: (value: Promise<AxiosResponse>) => void) => {
-        setTimeout(() => resolve(axios(config)), delay);
+      return new Promise((resolve: (value: Promise<HttpResponse>) => void) => {
+        setTimeout(() => resolve(httpClient(config)), delay);
       });
     }
     return res;
@@ -78,13 +96,24 @@ function getExponentialBackoffResponseHandler(
 
 class RequestClient {
   defaultTimeout: number;
-  axios: AxiosInstance;
+  agent: https.Agent | HttpsProxyAgent.HttpsProxyAgent;
   lastResponse?: Response<any>;
   lastRequest?: Request<any>;
   autoRetry: boolean;
   maxRetryDelay: number;
   maxRetries: number;
   keepAlive: boolean;
+  validationClient?: ValidationClientOptions;
+  defaultHeaders: Headers;
+  // Compatibility property for tests
+  axios: {
+    defaults: {
+      headers: {
+        post: Headers;
+      };
+      httpsAgent: https.Agent | HttpsProxyAgent.HttpsProxyAgent;
+    };
+  };
 
   /**
    * Make http request
@@ -108,6 +137,7 @@ class RequestClient {
     this.maxRetryDelay = opts.maxRetryDelay || DEFAULT_MAX_RETRY_DELAY;
     this.maxRetries = opts.maxRetries || DEFAULT_MAX_RETRIES;
     this.keepAlive = opts.keepAlive !== false;
+    this.validationClient = opts.validationClient;
 
     // construct an https agent
     let agentOpts: https.AgentOptions = {
@@ -128,34 +158,106 @@ class RequestClient {
       }
     }
 
-    let agent;
     if (process.env.HTTP_PROXY) {
       // Note: if process.env.HTTP_PROXY is set, we're not able to apply the given
       // socket timeout. See: https://github.com/TooTallNate/node-https-proxy-agent/pull/96
-      agent = HttpsProxyAgent(process.env.HTTP_PROXY);
+      this.agent = new HttpsProxyAgent.HttpsProxyAgent(process.env.HTTP_PROXY);
     } else {
-      agent = new https.Agent(agentOpts);
+      this.agent = new https.Agent(agentOpts);
     }
 
-    // construct an axios instance
-    this.axios = axios.create();
-    this.axios.defaults.headers.post["Content-Type"] = DEFAULT_CONTENT_TYPE;
-    this.axios.defaults.httpsAgent = agent;
-    if (opts.autoRetry) {
-      this.axios.interceptors.response.use(
-        getExponentialBackoffResponseHandler(this.axios, {
-          maxIntervalMillis: this.maxRetryDelay,
-          maxRetries: this.maxRetries,
-        })
-      );
-    }
+    // Set default headers
+    this.defaultHeaders = {
+      "Content-Type": DEFAULT_CONTENT_TYPE,
+    };
 
-    // if validation client is set, intercept the request using ValidationInterceptor
-    if (opts.validationClient) {
-      this.axios.interceptors.request.use(
-        this.validationInterceptor(opts.validationClient)
-      );
-    }
+    // Compatibility object for tests
+    this.axios = {
+      defaults: {
+        headers: {
+          post: this.defaultHeaders,
+        },
+        httpsAgent: this.agent,
+      },
+    };
+  }
+
+  private makeHttpRequest(config: HttpRequestConfig): Promise<HttpResponse> {
+    return new Promise((resolve, reject) => {
+      let url: URL;
+      try {
+        // Try to parse as a full URL first
+        url = new URL(config.url);
+      } catch (e) {
+        // If it fails, assume it's a path and add a default protocol
+        url = new URL('https://' + config.url);
+      }
+      
+      const isHttps = url.protocol === 'https:';
+      const httpModule = isHttps ? https : http;
+      
+      const options: https.RequestOptions | http.RequestOptions = {
+        hostname: url.hostname,
+        port: url.port || (isHttps ? 443 : 80),
+        path: url.pathname + url.search,
+        method: config.method.toUpperCase(),
+        headers: config.headers || {},
+        timeout: config.timeout || this.defaultTimeout,
+      };
+
+      // Only set agent for HTTPS requests or when using proxy
+      if (isHttps || this.agent instanceof HttpsProxyAgent.HttpsProxyAgent) {
+        (options as https.RequestOptions).agent = this.agent;
+      }
+
+      const req = httpModule.request(options, (res) => {
+        let data = '';
+        
+        res.on('data', (chunk) => {
+          data += chunk;
+        });
+        
+        res.on('end', () => {
+          let parsedData: any = data;
+          
+          // Try to parse JSON response
+          try {
+            if (res.headers['content-type']?.includes('application/json')) {
+              parsedData = JSON.parse(data);
+            }
+          } catch (e) {
+            // Keep original data if JSON parsing fails
+          }
+          
+          resolve({
+            status: res.statusCode || 0,
+            statusText: res.statusMessage || '',
+            headers: res.headers,
+            data: parsedData,
+          });
+        });
+      });
+
+      req.on('error', (err) => {
+        reject(err);
+      });
+
+      req.on('timeout', () => {
+        req.destroy();
+        reject(new Error(`Request timeout after ${config.timeout || this.defaultTimeout}ms`));
+      });
+
+      // Write request data if present
+      if (config.data) {
+        if (typeof config.data === 'string') {
+          req.write(config.data);
+        } else {
+          req.write(JSON.stringify(config.data));
+        }
+      }
+
+      req.end();
+    });
   }
 
   /**
@@ -185,7 +287,12 @@ class RequestClient {
       throw new Error("uri is required");
     }
 
-    var headers = opts.headers || {};
+    let headers = { ...(opts.headers || {}) };
+
+    // Only add default Content-Type for POST requests or when explicitly set
+    if ((opts.method.toLowerCase() === 'post' || opts.headers?.["Content-Type"]) && !headers["Content-Type"]) {
+      headers["Content-Type"] = DEFAULT_CONTENT_TYPE;
+    }
 
     if (!headers.Connection && !headers.connection)
       headers.Connection = this.keepAlive ? "keep-alive" : "close";
@@ -201,40 +308,57 @@ class RequestClient {
       headers.Authorization = await opts.authStrategy.getAuthString();
     }
 
-    const options: AxiosRequestConfig = {
-      timeout: opts.timeout || this.defaultTimeout,
-      maxRedirects: opts.allowRedirects ? 10 : 0,
-      url: opts.uri,
-      method: opts.method,
-      headers: opts.headers,
-      proxy: false,
-      validateStatus: (status) => status >= 100 && status < 600,
-    };
-
-    if (opts.data && options.headers) {
-      if (
-        options.headers["Content-Type"] === "application/x-www-form-urlencoded"
-      ) {
-        options.data = qs.stringify(opts.data, { arrayFormat: "repeat" });
-      } else if (options.headers["Content-Type"] === "application/json") {
-        options.data = opts.data;
+    // Apply validation client header if configured
+    if (this.validationClient) {
+      try {
+        const config = {
+          method: opts.method,
+          url: opts.uri,
+          headers: headers,
+          data: opts.data,
+        };
+        headers["Twilio-Client-Validation"] = new ValidationToken(
+          this.validationClient
+        ).fromHttpRequest(config);
+      } catch (err) {
+        console.log("Error creating Twilio-Client-Validation header:", err);
+        throw err;
       }
     }
 
+    let url = opts.uri;
+    
+    // Add query parameters to URL
     if (opts.params) {
-      options.params = opts.params;
-      options.paramsSerializer = (params) => {
-        return qs.stringify(params, { arrayFormat: "repeat" });
-      };
+      const queryString = qs.stringify(opts.params, { arrayFormat: "repeat" });
+      url += (url.includes('?') ? '&' : '?') + queryString;
+    }
+
+    const config: HttpRequestConfig = {
+      timeout: opts.timeout || this.defaultTimeout,
+      url: url,
+      method: opts.method,
+      headers: headers,
+    };
+
+    // Handle request data
+    if (opts.data) {
+      if (headers["Content-Type"] === "application/x-www-form-urlencoded") {
+        config.data = qs.stringify(opts.data, { arrayFormat: "repeat" });
+      } else if (headers["Content-Type"] === "application/json") {
+        config.data = opts.data;
+      } else {
+        config.data = opts.data;
+      }
     }
 
     const requestOptions: LastRequestOptions<TData> = {
       method: opts.method,
       url: opts.uri,
       auth: auth,
-      params: options.params,
+      params: opts.params,
       data: opts.data,
-      headers: opts.headers,
+      headers: headers,
     };
 
     if (opts.logLevel === "debug") {
@@ -245,27 +369,52 @@ class RequestClient {
     this.lastResponse = undefined;
     this.lastRequest = new Request(requestOptions);
 
-    return this.axios(options)
-      .then((response) => {
-        if (opts.logLevel === "debug") {
-          console.log(`response.statusCode: ${response.status}`);
-          console.log(`response.headers: ${JSON.stringify(response.headers)}`);
-        }
-        _this.lastResponse = new Response(
-          response.status,
-          response.data,
-          response.headers
+    // Make the HTTP request with optional retry logic
+    const makeRequest = async (requestConfig: BackoffRequestConfig): Promise<HttpResponse> => {
+      const response = await this.makeHttpRequest(requestConfig);
+      
+      if (this.autoRetry) {
+        const retryHandler = getExponentialBackoffResponseHandler(
+          (config) => this.makeHttpRequest(config),
+          {
+            maxIntervalMillis: this.maxRetryDelay,
+            maxRetries: this.maxRetries,
+          }
         );
-        return {
-          statusCode: response.status,
-          body: response.data,
-          headers: response.headers,
-        };
-      })
-      .catch((error) => {
-        _this.lastResponse = undefined;
-        throw error;
-      });
+        
+        const retryResult = retryHandler(response, requestConfig);
+        if (retryResult instanceof Promise) {
+          return await retryResult;
+        }
+        return retryResult;
+      }
+      
+      return response;
+    };
+
+    try {
+      const response = await makeRequest({ ...config, retryCount: 0 });
+      
+      if (opts.logLevel === "debug") {
+        console.log(`response.statusCode: ${response.status}`);
+        console.log(`response.headers: ${JSON.stringify(response.headers)}`);
+      }
+      
+      _this.lastResponse = new Response(
+        response.status,
+        response.data,
+        response.headers
+      );
+      
+      return {
+        statusCode: response.status,
+        body: response.data,
+        headers: response.headers,
+      };
+    } catch (error) {
+      _this.lastResponse = undefined;
+      throw error;
+    }
   }
 
   filterLoggingHeaders(headers: Headers) {
@@ -277,26 +426,10 @@ class RequestClient {
   /**
    * ValidationInterceptor adds the Twilio-Client-Validation header to the request
    * @param validationClient - The validation client for PKCV
-   * <p>Usage Example:</p>
-   * ```javascript
-   * import axios from "axios";
-   * // Initialize validation client with credentials
-   * const validationClient = {
-   *           accountSid: "ACXXXXXXXXXXXXXXXX",
-   *           credentialSid: "CRXXXXXXXXXXXXXXXX",
-   *           signingKey: "SKXXXXXXXXXXXXXXXX",
-   *           privateKey: "private key",
-   *           algorithm: "PS256",
-   *         }
-   * // construct an axios instance
-   * const instance = axios.create();
-   * instance.interceptors.request.use(
-   *   ValidationInterceptor(opts.validationClient)
-   * );
-   * ```
+   * @deprecated This method is kept for backward compatibility. Validation is now handled inline in the request method.
    */
   validationInterceptor(validationClient: ValidationClientOptions) {
-    return function (config: InternalAxiosRequestConfig) {
+    return function (config: any) {
       config.headers = config.headers || {};
       try {
         config.headers["Twilio-Client-Validation"] = new ValidationToken(

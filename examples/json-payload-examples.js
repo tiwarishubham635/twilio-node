@@ -1,9 +1,9 @@
 /**
  * JSON Payload Examples for Twilio Node.js Helper Library
- * 
+ *
  * This file demonstrates how to use JSON payloads with various Twilio APIs.
  * As of version 5.0.0, the Node helper library supports application/json content type.
- * 
+ *
  * Prerequisites:
  * - Set environment variables: TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN
  * - Some examples require additional setup (Assistant SID, Service SID, etc.)
@@ -12,15 +12,20 @@
 const Twilio = require("../lib");
 
 // Check if we have real credentials
-const hasRealCredentials = process.env.TWILIO_ACCOUNT_SID && 
-                          process.env.TWILIO_AUTH_TOKEN &&
-                          process.env.TWILIO_ACCOUNT_SID.startsWith('AC');
+const hasRealCredentials =
+  process.env.TWILIO_ACCOUNT_SID &&
+  process.env.TWILIO_AUTH_TOKEN &&
+  process.env.TWILIO_ACCOUNT_SID.startsWith("AC");
 
 console.log("=== JSON Payload Examples for Twilio Node.js ===\n");
 
 if (!hasRealCredentials) {
-  console.log("⚠ Demo Mode: Set TWILIO_ACCOUNT_SID and TWILIO_AUTH_TOKEN for live testing");
-  console.log("⚠ The examples below show JSON payload structures and API patterns\n");
+  console.log(
+    "⚠ Demo Mode: Set TWILIO_ACCOUNT_SID and TWILIO_AUTH_TOKEN for live testing"
+  );
+  console.log(
+    "⚠ The examples below show JSON payload structures and API patterns\n"
+  );
 }
 
 // =============================================================================
@@ -42,16 +47,16 @@ const assistantToolData = {
       properties: {
         location: {
           type: "string",
-          description: "The location to get weather for"
+          description: "The location to get weather for",
         },
         units: {
           type: "string",
           enum: ["celsius", "fahrenheit"],
-          description: "Temperature units"
-        }
+          description: "Temperature units",
+        },
       },
-      required: ["location"]
-    }
+      required: ["location"],
+    },
   },
   policy: {
     name: "weather_policy",
@@ -60,10 +65,10 @@ const assistantToolData = {
     policy_details: {
       allowed_domains: ["weather.com", "openweathermap.org"],
       rate_limit: {
-        requests_per_minute: 60
-      }
-    }
-  }
+        requests_per_minute: 60,
+      },
+    },
+  },
 };
 
 console.log("📋 Complex AI Assistant Tool JSON Payload:");
@@ -82,16 +87,16 @@ console.log("2. Flex API - Interaction Transfer with JSON");
 const flexTransferData = {
   from: "agent1@company.com",
   to: "agent2@company.com",
-  type: "agent", 
+  type: "agent",
   execution: {
     timeout: 300,
     priority: "high",
     metadata: {
       reason: "customer_escalation",
       department: "technical_support",
-      skill_requirements: ["api_knowledge", "troubleshooting"]
-    }
-  }
+      skill_requirements: ["api_knowledge", "troubleshooting"],
+    },
+  },
 };
 
 console.log("📋 Flex Interaction Transfer JSON Payload:");
@@ -103,7 +108,7 @@ console.log("  .channels(channelSid)");
 console.log("  .transfers.create(transferData);");
 
 // =============================================================================
-// Example 3: TaskRouter - Bulk Statistics with JSON Payload  
+// Example 3: TaskRouter - Bulk Statistics with JSON Payload
 // =============================================================================
 console.log("\n" + "=".repeat(70));
 console.log("3. TaskRouter - Bulk Statistics Request with JSON");
@@ -113,10 +118,15 @@ const taskRouterStatsData = {
     start_date: "2024-01-01T00:00:00Z",
     end_date: "2024-01-31T23:59:59Z",
     task_channels: ["voice", "chat", "video"],
-    split_by_wait_time: true
+    split_by_wait_time: true,
   },
   granularity: "daily",
-  metrics: ["tasks_entered", "tasks_completed", "avg_wait_time", "max_wait_time"]
+  metrics: [
+    "tasks_entered",
+    "tasks_completed",
+    "avg_wait_time",
+    "max_wait_time",
+  ],
 };
 
 console.log("📋 TaskRouter Bulk Statistics JSON Payload:");
@@ -138,26 +148,28 @@ const messagingChannelsData = {
     {
       sender_id: "+1234567890",
       sender_type: "phone_number",
-      country_code: "US"
+      country_code: "US",
     },
     {
-      sender_id: "brand_name_123", 
+      sender_id: "brand_name_123",
       sender_type: "alphanumeric",
-      country_code: "GB"
-    }
+      country_code: "GB",
+    },
   ],
   messaging_service_sid: "MESSAGING_SERVICE_SID_HERE", // Replace with actual SID
   configuration: {
     fallback_enabled: true,
     callback_url: "https://example.com/webhook",
-    callback_method: "POST"
-  }
+    callback_method: "POST",
+  },
 };
 
 console.log("📋 Messaging Channels Sender JSON Payload:");
 console.log(JSON.stringify(messagingChannelsData, null, 2));
 console.log("\n💡 Usage:");
-console.log("const channelsSender = await twilio.messaging.v2.channelsSenders.create(data);");
+console.log(
+  "const channelsSender = await twilio.messaging.v2.channelsSenders.create(data);"
+);
 
 // =============================================================================
 // Example 5: Advanced Nested JSON Structure
@@ -167,7 +179,7 @@ console.log("5. Advanced Nested JSON Structure Example");
 
 const complexNestedData = {
   name: "database_query_tool",
-  description: "Advanced database querying tool", 
+  description: "Advanced database querying tool",
   type: "function",
   enabled: true,
   meta: {
@@ -175,22 +187,22 @@ const complexNestedData = {
     url: "https://api.database.com/query",
     headers: {
       "Content-Type": "application/json",
-      "Authorization": "Bearer token_here"
+      Authorization: "Bearer token_here",
     },
     input_schema: {
       type: "object",
       properties: {
         query: {
-          type: "object", 
+          type: "object",
           properties: {
             select: {
               type: "array",
               items: { type: "string" },
-              description: "Fields to select"
+              description: "Fields to select",
             },
             from: {
               type: "string",
-              description: "Table name"
+              description: "Table name",
             },
             where: {
               type: "object",
@@ -201,28 +213,28 @@ const complexNestedData = {
                     type: "object",
                     properties: {
                       field: { type: "string" },
-                      operator: { 
-                        type: "string", 
-                        enum: ["=", "!=", ">", "<", ">=", "<=", "LIKE"] 
+                      operator: {
+                        type: "string",
+                        enum: ["=", "!=", ">", "<", ">=", "<=", "LIKE"],
                       },
-                      value: { type: "string" }
+                      value: { type: "string" },
                     },
-                    required: ["field", "operator", "value"]
-                  }
+                    required: ["field", "operator", "value"],
+                  },
                 },
                 logic: {
                   type: "string",
                   enum: ["AND", "OR"],
-                  default: "AND"
-                }
-              }
-            }
+                  default: "AND",
+                },
+              },
+            },
           },
-          required: ["select", "from"]
-        }
+          required: ["select", "from"],
+        },
       },
-      required: ["query"]
-    }
+      required: ["query"],
+    },
   },
   policy: {
     name: "database_access_policy",
@@ -232,14 +244,14 @@ const complexNestedData = {
       allowed_tables: ["users", "products", "orders"],
       rate_limits: {
         requests_per_minute: 30,
-        concurrent_requests: 5
+        concurrent_requests: 5,
       },
       access_controls: {
         require_approval: true,
-        max_rows_returned: 1000
-      }
-    }
-  }
+        max_rows_returned: 1000,
+      },
+    },
+  },
 };
 
 console.log("📋 Complex Nested JSON Structure:");
@@ -260,14 +272,14 @@ const jsonPayloadWithHeaders = {
   name: "webhook_tool",
   description: "Tool with custom headers",
   type: "webhook",
-  enabled: true
+  enabled: true,
 };
 
 const customHeaders = {
   "X-Custom-Header": "custom-value",
   "X-Request-ID": "req-123456",
   "X-API-Version": "2024-01-01",
-  "X-Client-Name": "my-application"
+  "X-Client-Name": "my-application",
 };
 
 console.log("📋 JSON Payload:");
@@ -359,5 +371,5 @@ module.exports = {
   messagingChannelsData,
   complexNestedData,
   jsonPayloadWithHeaders,
-  customHeaders
+  customHeaders,
 };

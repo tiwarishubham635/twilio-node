@@ -6,6 +6,8 @@ This directory contains examples demonstrating how to use JSON payloads with the
 
 - **`simple-json-examples.js`** - Basic examples showing the most common JSON payload patterns
 - **`json-payload-examples.js`** - Comprehensive examples covering various APIs and complex structures
+- **`content-api-examples.js`** - Dedicated Content API examples with all content types
+- **`CONTENT_API_EXAMPLES.md`** - Comprehensive Content API documentation with JSON payload examples
 
 ## Prerequisites
 
@@ -28,8 +30,12 @@ node examples/simple-json-examples.js
 ```
 
 ### Comprehensive Examples
-```bash
 node examples/json-payload-examples.js
+```
+
+### Content API Examples
+```bash
+node examples/content-api-examples.js
 ```
 
 ## What's Covered
@@ -49,10 +55,25 @@ node examples/json-payload-examples.js
 - Complex nested JSON structures
 - Error handling patterns
 
+### Content API Examples
+- Text content creation (`twilio/text`)
+- Media content with images/files (`twilio/media`)
+- Interactive quick replies (`twilio/quick-reply`)
+- Call-to-action buttons (`twilio/call-to-action`)
+- List picker menus (`twilio/list-picker`)
+- Rich card content (`twilio/card`)
+- Carousel with multiple cards (`twilio/carousel`)
+- Location sharing (`twilio/location`)
+- WhatsApp authentication templates
+- Content with variable substitution
+- Content approval workflows
+- Advanced filtering and sorting (v2 API)
+
 ## APIs That Support JSON Payloads
 
 The following Twilio APIs support JSON payloads (non-exhaustive list):
 
+- **Content API** - Rich messaging content creation and management
 - **AI Assistants** - Creating and managing AI tools
 - **Flex API** - Contact center interactions and transfers
 - **TaskRouter** - Bulk operations and complex statistics
@@ -126,6 +147,8 @@ try {
 
 For detailed API documentation and JSON schemas:
 - [Twilio API Documentation](https://www.twilio.com/docs/api)
+- [Content API Documentation](https://www.twilio.com/docs/content-api)
+- [Content Types Overview](https://www.twilio.com/docs/content-api/content-types-overview)
 - [AI Assistants API](https://www.twilio.com/docs/assistants)
 - [Flex API](https://www.twilio.com/docs/flex)
 - [TaskRouter API](https://www.twilio.com/docs/taskrouter)

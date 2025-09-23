@@ -1,0 +1,1 @@
+{"version":3,"file":"ApiBase.d.ts","sourceRoot":"","sources":["../../src/rest/ApiBase.ts"],"names":[],"mappings":"AAWA,OAAO,MAAM,MAAM,gBAAgB,CAAC;AACpC,OAAO,KAAK,MAAM,aAAa,CAAC;AAEhC,cAAM,OAAQ,SAAQ,MAAM;IAC1B,MAAM,CAAC,EAAE,KAAK,CAAC;IAEf;;;;OAIG;gBACS,MAAM,EAAE,GAAG;IAIvB,IAAI,KAAK,IAAI,KAAK,CAGjB;CACF;AAED,SAAS,OAAO,CAAC"}

@@ -1,0 +1,1 @@
+{"version":3,"file":"PreviewIamBase.d.ts","sourceRoot":"","sources":["../../src/rest/PreviewIamBase.ts"],"names":[],"mappings":"AAWA,OAAO,MAAM,MAAM,gBAAgB,CAAC;AACpC,OAAO,EAAE,MAAM,iBAAiB,CAAC;AAEjC,cAAM,cAAe,SAAQ,MAAM;IACjC,GAAG,CAAC,EAAE,EAAE,CAAC;IAET;;;;OAIG;gBACS,MAAM,EAAE,GAAG;IAIvB,IAAI,EAAE,IAAI,EAAE,CAGX;CACF;AAED,SAAS,cAAc,CAAC"}

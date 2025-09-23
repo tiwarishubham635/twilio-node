@@ -1,0 +1,1 @@
+{"version":3,"file":"SyncBase.d.ts","sourceRoot":"","sources":["../../src/rest/SyncBase.ts"],"names":[],"mappings":"AAWA,OAAO,MAAM,MAAM,gBAAgB,CAAC;AACpC,OAAO,EAAE,MAAM,WAAW,CAAC;AAE3B,cAAM,QAAS,SAAQ,MAAM;IAC3B,GAAG,CAAC,EAAE,EAAE,CAAC;IAET;;;;OAIG;gBACS,MAAM,EAAE,GAAG;IAIvB,IAAI,EAAE,IAAI,EAAE,CAGX;CACF;AAED,SAAS,QAAQ,CAAC"}

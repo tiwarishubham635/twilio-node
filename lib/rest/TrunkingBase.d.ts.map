@@ -1,0 +1,1 @@
+{"version":3,"file":"TrunkingBase.d.ts","sourceRoot":"","sources":["../../src/rest/TrunkingBase.ts"],"names":[],"mappings":"AAWA,OAAO,MAAM,MAAM,gBAAgB,CAAC;AACpC,OAAO,EAAE,MAAM,eAAe,CAAC;AAE/B,cAAM,YAAa,SAAQ,MAAM;IAC/B,GAAG,CAAC,EAAE,EAAE,CAAC;IAET;;;;OAIG;gBACS,MAAM,EAAE,GAAG;IAIvB,IAAI,EAAE,IAAI,EAAE,CAGX;CACF;AAED,SAAS,YAAY,CAAC"}

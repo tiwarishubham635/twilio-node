@@ -1,0 +1,1 @@
+{"version":3,"file":"FrontlineApi.d.ts","sourceRoot":"","sources":["../../src/rest/FrontlineApi.ts"],"names":[],"mappings":"AAAA,OAAO,EAAE,gBAAgB,EAAE,MAAM,wBAAwB,CAAC;AAC1D,OAAO,gBAAgB,MAAM,oBAAoB,CAAC;AAElD,cAAM,YAAa,SAAQ,gBAAgB;IACzC;;OAEG;IACH,IAAI,KAAK,IAAI,gBAAgB,CAG5B;CACF;AAED,SAAS,YAAY,CAAC"}

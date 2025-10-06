@@ -1,0 +1,1 @@
+{"version":3,"file":"AuthStrategy.d.ts","sourceRoot":"","sources":["../../src/auth_strategy/AuthStrategy.ts"],"names":[],"mappings":"AAAA,MAAM,CAAC,OAAO,CAAC,QAAQ,OAAO,YAAY;IACxC,OAAO,CAAC,QAAQ,CAAS;IACzB,SAAS,aAAa,QAAQ,EAAE,MAAM;IAGtC,WAAW,IAAI,MAAM;IAGrB,QAAQ,CAAC,aAAa,IAAI,OAAO,CAAC,MAAM,CAAC;IACzC,QAAQ,CAAC,sBAAsB,IAAI,OAAO;CAC3C"}

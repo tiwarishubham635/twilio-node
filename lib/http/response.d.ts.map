@@ -1,0 +1,1 @@
+{"version":3,"file":"response.d.ts","sourceRoot":"","sources":["../../src/http/response.ts"],"names":[],"mappings":"AAAA,MAAM,CAAC,OAAO,OAAO,QAAQ,CAAC,QAAQ;IAE3B,UAAU,EAAE,MAAM;IAClB,IAAI,EAAE,QAAQ;IACd,OAAO,EAAE,GAAG;gBAFZ,UAAU,EAAE,MAAM,EAClB,IAAI,EAAE,QAAQ,EACd,OAAO,EAAE,GAAG;IAGrB,QAAQ,IAAI,MAAM;CAGnB"}

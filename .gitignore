@@ -37,4 +37,7 @@ yarn.lock
 package-lock.json
 
 **/.openapi-generator*
-lib
+
+# Test files
+test-esm.js
+test-esm-module/

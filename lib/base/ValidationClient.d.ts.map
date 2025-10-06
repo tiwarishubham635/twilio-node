@@ -1,0 +1,1 @@
+{"version":3,"file":"ValidationClient.d.ts","sourceRoot":"","sources":["../../src/base/ValidationClient.ts"],"names":[],"mappings":"AAAA,kBAAU,gBAAgB,CAAC;IACzB,UAAiB,uBAAuB;QACtC,UAAU,EAAE,MAAM,CAAC;QACnB,aAAa,EAAE,MAAM,CAAC;QACtB,UAAU,EAAE,MAAM,CAAC;QACnB,UAAU,EAAE,MAAM,CAAC;QACnB,SAAS,CAAC,EAAE,MAAM,CAAC;KACpB;CACF;AAED,SAAS,gBAAgB,CAAC"}

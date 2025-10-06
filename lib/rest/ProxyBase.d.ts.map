@@ -1,0 +1,1 @@
+{"version":3,"file":"ProxyBase.d.ts","sourceRoot":"","sources":["../../src/rest/ProxyBase.ts"],"names":[],"mappings":"AAWA,OAAO,MAAM,MAAM,gBAAgB,CAAC;AACpC,OAAO,EAAE,MAAM,YAAY,CAAC;AAE5B,cAAM,SAAU,SAAQ,MAAM;IAC5B,GAAG,CAAC,EAAE,EAAE,CAAC;IAET;;;;OAIG;gBACS,MAAM,EAAE,GAAG;IAIvB,IAAI,EAAE,IAAI,EAAE,CAGX;CACF;AAED,SAAS,SAAS,CAAC"}

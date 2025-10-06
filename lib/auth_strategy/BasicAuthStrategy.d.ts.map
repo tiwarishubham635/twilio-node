@@ -1,0 +1,1 @@
+{"version":3,"file":"BasicAuthStrategy.d.ts","sourceRoot":"","sources":["../../src/auth_strategy/BasicAuthStrategy.ts"],"names":[],"mappings":"AAAA,OAAO,YAAY,MAAM,gBAAgB,CAAC;AAE1C,MAAM,CAAC,OAAO,OAAO,iBAAkB,SAAQ,YAAY;IACzD,OAAO,CAAC,QAAQ,CAAS;IACzB,OAAO,CAAC,QAAQ,CAAS;gBAEb,QAAQ,EAAE,MAAM,EAAE,QAAQ,EAAE,MAAM;IAM9C,aAAa,IAAI,OAAO,CAAC,MAAM,CAAC;IAOhC,sBAAsB,IAAI,OAAO;CAGlC"}

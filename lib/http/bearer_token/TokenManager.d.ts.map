@@ -1,0 +1,1 @@
+{"version":3,"file":"TokenManager.d.ts","sourceRoot":"","sources":["../../../src/http/bearer_token/TokenManager.ts"],"names":[],"mappings":"AAAA,MAAM,CAAC,OAAO,CAAC,QAAQ,OAAO,YAAY;IACxC,QAAQ,CAAC,UAAU,IAAI,OAAO,CAAC,MAAM,CAAC;CACvC"}

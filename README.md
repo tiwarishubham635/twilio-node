@@ -34,16 +34,57 @@ TypeScript is supported for TypeScript version 2.9 and above.
 
 `npm install twilio` or `yarn add twilio`
 
+### Module System Support
+
+This library supports both CommonJS and ES Modules:
+
+#### CommonJS (Node.js default)
+```js
+const twilio = require('twilio');
+const client = twilio(accountSid, authToken);
+```
+
+#### ES Modules
+```js
+import twilio from 'twilio';
+// Or with named imports
+import twilio, { Twilio, jwt, twiml } from 'twilio';
+
+const client = twilio(accountSid, authToken);
+// Or
+const client = new Twilio(accountSid, authToken);
+```
+
 ### Test your installation
 
 To make sure the installation was successful, try sending yourself an SMS message, like this:
 
+#### CommonJS
 ```js
 // Your AccountSID and Auth Token from console.twilio.com
 const accountSid = 'ACXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX';
 const authToken = 'your_auth_token';
 
 const client = require('twilio')(accountSid, authToken);
+
+client.messages
+  .create({
+    body: 'Hello from twilio-node',
+    to: '+12345678901', // Text your number
+    from: '+12345678901', // From a valid Twilio number
+  })
+  .then((message) => console.log(message.sid));
+```
+
+#### ES Modules
+```js
+// Your AccountSID and Auth Token from console.twilio.com
+import twilio from 'twilio';
+
+const accountSid = 'ACXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX';
+const authToken = 'your_auth_token';
+
+const client = twilio(accountSid, authToken);
 
 client.messages
   .create({

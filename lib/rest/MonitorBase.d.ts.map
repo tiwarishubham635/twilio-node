@@ -1,0 +1,1 @@
+{"version":3,"file":"MonitorBase.d.ts","sourceRoot":"","sources":["../../src/rest/MonitorBase.ts"],"names":[],"mappings":"AAWA,OAAO,MAAM,MAAM,gBAAgB,CAAC;AACpC,OAAO,EAAE,MAAM,cAAc,CAAC;AAE9B,cAAM,WAAY,SAAQ,MAAM;IAC9B,GAAG,CAAC,EAAE,EAAE,CAAC;IAET;;;;OAIG;gBACS,MAAM,EAAE,GAAG;IAIvB,IAAI,EAAE,IAAI,EAAE,CAGX;CACF;AAED,SAAS,WAAW,CAAC"}

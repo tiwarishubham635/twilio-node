@@ -851,12 +851,25 @@ export function MessageListInstance(
       });
 
     operationPromise = operationPromise.then(
-      (payload) =>
-        new MessageInstance(
+      (payload) => {
+        const messageInstance = new MessageInstance(
           operationVersion,
           payload,
           instance._solution.accountSid
-        )
+        );
+        
+        // Handle case where contentSid is used with messagingServiceSid but body is empty
+        if (
+          params["contentSid"] && 
+          params["messagingServiceSid"] && 
+          (!messageInstance.body || messageInstance.body.trim() === "")
+        ) {
+          // Provide a placeholder indicating the content will be rendered by the messaging service
+          messageInstance.body = `[Content Template: ${params["contentSid"]}]`;
+        }
+        
+        return messageInstance;
+      }
     );
 
     operationPromise = instance._version.setPromiseCallback(

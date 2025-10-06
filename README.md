@@ -168,20 +168,52 @@ This will result in the `hostname` transforming from `api.twilio.com` to `api.sy
 
 ### Iterate through records
 
-The library automatically handles paging for you. Collections, such as `calls` and `messages`, have `list` and `each` methods that page under the hood. With both `list` and `each`, you can specify the number of records you want to receive (`limit`) and the maximum size you want each page fetch to be (`pageSize`). The library will then handle the task for you.
+The library provides several methods for handling API responses that return collections of resources. Understanding when and how to use each method is crucial for building efficient applications.
 
-`list` eagerly fetches all records and returns them as a list, whereas `each` streams records and lazily retrieves pages of records as you iterate over the collection. You can also page manually using the `page` method.
+#### Available Methods
 
-For more information about these methods, view the [auto-generated library docs](https://www.twilio.com/docs/libraries/reference/twilio-node/).
+- **`list()`** - Eagerly fetches all records and returns them as an array
+- **`each()`** - Streams records lazily, processing one at a time  
+- **`page()`** - Manual pagination to get specific pages of results
+- **`getPage()`** - Navigate to a specific page by URL
+- **`stream()`** - Real-time streaming (for audio/video, not pagination)
+
+#### Quick Examples
 
 ```js
-// Your Account SID and Auth Token from console.twilio.com
-const accountSid = 'ACXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX';
-const authToken = 'your_auth_token';
 const client = require('twilio')(accountSid, authToken);
 
-client.calls.each((call) => console.log(call.direction));
+// list() - Get all records at once (good for small datasets)
+const messages = await client.messages.list({ limit: 100 });
+console.log(`Retrieved ${messages.length} messages`);
+
+// each() - Process records one at a time (memory efficient)
+client.calls.each((call) => {
+    console.log(`Call from ${call.from} to ${call.to}`);
+});
+
+// page() - Manual pagination control
+const page = await client.messages.page({ pageSize: 20 });
+console.log(`Page has ${page.instances.length} messages`);
+if (page.nextPageUrl) {
+    const nextPage = await client.messages.getPage(page.nextPageUrl);
+}
 ```
+
+#### When to Use Each Method
+
+| Method | Best For | Memory Usage | Use Case |
+|--------|----------|--------------|----------|
+| `list()` | Small-medium datasets | High | Need all data at once |
+| `each()` | Large datasets | Low | Memory efficient processing |
+| `page()` | Custom pagination | Low | Building pagination UI |
+| `getPage()` | URL navigation | Low | Navigate between pages |
+
+With both `list` and `each`, you can specify the number of records you want to receive (`limit`) and the maximum size you want each page fetch to be (`pageSize`). The library will then handle the task for you.
+
+For comprehensive documentation, examples, and advanced patterns, see [PAGINATION_AND_STREAMING.md](PAGINATION_AND_STREAMING.md).
+
+For more information about these methods, view the [auto-generated library docs](https://www.twilio.com/docs/libraries/reference/twilio-node/).
 
 ### Enable Debug Logging
 
